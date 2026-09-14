@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://folus-emporium-stores.vercel.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://folus-emporium-stores-online.vercel.app'
 
 type OrderLike = {
   id:string

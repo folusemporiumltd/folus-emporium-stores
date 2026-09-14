@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-const PUBLIC_SITE_URL = 'https://folus-emporium-stores.vercel.app'
+const PUBLIC_SITE_URL = 'https://folus-emporium-stores-online.vercel.app'
 
 export async function requestPasswordReset(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim()

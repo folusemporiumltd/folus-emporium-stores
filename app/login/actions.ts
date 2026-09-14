@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-const PUBLIC_SITE_URL = 'https://folus-emporium-stores.vercel.app'
+const PUBLIC_SITE_URL = 'https://folus-emporium-stores-online.vercel.app'
 
 function safeNext(value: string) {
   return value.startsWith('/') && !value.startsWith('//') ? value : '/account'

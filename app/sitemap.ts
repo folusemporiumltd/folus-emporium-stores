@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { createCatalogueClient } from '@/lib/supabase/server'
 
-const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://folus-emporium-stores.vercel.app'
+const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://folus-emporium-stores-online.vercel.app'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createCatalogueClient()

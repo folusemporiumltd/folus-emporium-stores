@@ -10,7 +10,7 @@ Product option labels support capacity, clothing size, colour, pack count or wei
 ## Projects
 - GitHub: https://github.com/folusemporiumltd/folus-emporium-stores
 - Supabase: vzrgjwhkeezojkgxpirn
-- Expected site URL: https://folus-emporium-stores.vercel.app (set NEXT_PUBLIC_SITE_URL to the actual domain)
+- Expected site URL: https://folus-emporium-stores-online.vercel.app (set NEXT_PUBLIC_SITE_URL to the actual domain)
 
 ## Setup
 1. Import this repository into Vercel with the Next.js framework.

@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import AdminBreadcrumbs from '@/components/admin-breadcrumbs'
 import NewsletterComposer from './newsletter-composer'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://folus-emporium-stores.vercel.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://folus-emporium-stores-online.vercel.app'
 const TEST_FROM = 'Folus Emporium Stores <onboarding@resend.dev>'
 
 async function requireAdmin(next='/admin/newsletter') {

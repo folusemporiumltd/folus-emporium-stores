@@ -12,7 +12,7 @@ import GoogleAnalytics from '@/components/google-analytics'
 import StorefrontFooter from '@/components/storefront-footer'
 import AdminFormLoading from '@/components/admin-form-loading'
 
-const site=process.env.NEXT_PUBLIC_SITE_URL || 'https://folus-emporium-stores.vercel.app'
+const site=process.env.NEXT_PUBLIC_SITE_URL || 'https://folus-emporium-stores-online.vercel.app'
 const seoTitle="Folus Emporium Stores | Curating Excellence for Life’s Finest Moments"
 const seoDescription='Shop kitchen and home appliances, gifts, food and beverages, personal care, beauty, fashion and accessories at Folus Emporium Stores.'
 
