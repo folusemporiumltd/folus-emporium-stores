@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 // These are the public Supabase project values for Folus Emporium Stores.
 // The publishable key is safe to use in browser/server public-data queries.
 // Sensitive service-role credentials are intentionally NOT hardcoded.
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './config'
+import { CATALOGUE_PUBLISHABLE_KEY, CATALOGUE_URL, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './config'
 
 export async function createClient() {
   const cookieStore = await cookies()
@@ -41,7 +41,7 @@ export async function createClient() {
  * taking the public Shop/Home pages offline.
  */
 export async function createCatalogueClient() {
-  return createSupabaseClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  return createSupabaseClient(CATALOGUE_URL, CATALOGUE_PUBLISHABLE_KEY, {
     auth: { autoRefreshToken: false, persistSession: false },
   })
 }
