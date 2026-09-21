@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createCatalogueClient, createClient } from '@/lib/supabase/server'
-import { SITE_KEY } from '@/lib/site'
 
 export const maxDuration = 30
 
@@ -33,7 +32,7 @@ export async function POST(request: Request) {
 
   const catalogue = await createCatalogueClient()
   const [{ data: productsData }, { data: variantsData }] = await Promise.all([
-    catalogue.from('products').select('id,name,slug,description,image_url,price,default_size_grams').eq('site_key', SITE_KEY).eq('is_active', true).order('name'),
+    catalogue.from('products').select('id,name,slug,description,image_url,price,default_size_grams').eq('is_active', true).order('name'),
     catalogue.from('product_variants').select('id,product_id,size_grams,size_label,price,stock_quantity').eq('is_active', true).gt('price', 0).order('size_grams'),
   ])
   const products = productsData ?? []
