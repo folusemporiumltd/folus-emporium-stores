@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import {notFound} from 'next/navigation'
-import {createClient} from '@/lib/supabase/server'
+import {createCatalogueClient} from '@/lib/supabase/server'
 import ProductVariantPicker from '@/components/product-variant-picker'
 import CartLink from '@/components/cart-link'
 import SocialShare from '@/components/social-share'
@@ -10,7 +10,7 @@ export const revalidate = 0
 
 export default async function ProductPage({params}:{params:Promise<{slug:string}>}){
  const {slug}=await params
- const s=await createClient()
+ const s=await createCatalogueClient()
  const {data,error}=await s.rpc('get_public_product_detail',{p_slug:slug})
  const detail=data as any
  const p=detail?.product

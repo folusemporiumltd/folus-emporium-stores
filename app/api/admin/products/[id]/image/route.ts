@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createStoreAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient()
-  const { data: authData } = await supabase.auth.getUser()
+  const identity = await createClient()
+  const { data: authData } = await identity.auth.getUser()
   if (!authData.user) return NextResponse.json({ error: 'You must be signed in as an administrator.' }, { status: 401 })
-  const { data: isAdmin, error: adminError } = await supabase.rpc('get_my_admin_status')
+  const { data: isAdmin, error: adminError } = await identity.rpc('get_my_admin_status')
   if (adminError || isAdmin !== true) return NextResponse.json({ error: 'Administrator access required.' }, { status: 403 })
+  const supabase = createStoreAdminClient()
 
   const { id } = await params
   const formData = await request.formData()

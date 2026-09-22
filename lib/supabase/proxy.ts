@@ -31,6 +31,17 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims()
   const user = data?.claims
   const pathname = request.nextUrl.pathname
+  // Until each module is routed to the Store database, prevent administrators
+  // from editing the main website's records through this separate storefront.
+  if (pathname.startsWith('/admin/') && !pathname.startsWith('/admin/products')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/admin/products'
+    url.searchParams.set('notice', 'Other Store admin modules are being separated from the main website.')
+    return NextResponse.redirect(url)
+  }
+  if (pathname.startsWith('/api/admin/') && !pathname.startsWith('/api/admin/products/')) {
+    return NextResponse.json({ error: 'This Store admin module is unavailable while its data is being separated.' }, { status: 503 })
+  }
   const publicRoute =
     pathname === '/' ||
     pathname.startsWith('/login') ||

@@ -2,11 +2,12 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createStoreAdminClient } from '@/lib/supabase/admin'
 import AdminProductImageUploader from '@/components/admin-product-image-uploader'
 import AdminNewProductImageField from '@/components/admin-new-product-image-field'
 import AdminBreadcrumbs from '@/components/admin-breadcrumbs'
 
-async function requireAdmin(){const s=await createClient();const {data:a}=await s.auth.getUser();if(!a.user)redirect('/login?next=/admin/products&mode=signin');const {data:isAdmin,error}=await s.rpc('get_my_admin_status');if(error||isAdmin!==true)redirect('/account?admin_error=access');return {s,user:a.user}}
+async function requireAdmin(){const identity=await createClient();const {data:a}=await identity.auth.getUser();if(!a.user)redirect('/login?next=/admin/products&mode=signin');const {data:isAdmin,error}=await identity.rpc('get_my_admin_status');if(error||isAdmin!==true)redirect('/account?admin_error=access');return {s:createStoreAdminClient(),user:a.user}}
 function refresh(slug?:string){revalidatePath('/');revalidatePath('/shop');revalidatePath('/admin');revalidatePath('/admin/products');revalidatePath('/admin/dashboard');if(slug)revalidatePath(`/shop/${slug}`)}
 const money=(n:any)=>`₦${Number(n||0).toLocaleString('en-NG')}`
 
