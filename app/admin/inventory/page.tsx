@@ -1,18 +1,11 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/supabase/store-access'
 import AdminBreadcrumbs from '@/components/admin-breadcrumbs'
 import '../dashboard/dashboard.css'
 
-async function requireAdmin(){
-  const supabase=await createClient()
-  const {data:auth}=await supabase.auth.getUser()
-  if(!auth.user)redirect('/login?next=/admin/inventory&mode=signin')
-  const {data:isAdmin,error}=await supabase.rpc('get_my_admin_status')
-  if(error||isAdmin!==true)redirect('/account?admin_error=access')
-  return {supabase,user:auth.user}
-}
+async function requireAdmin(){const {db,user}=await requireStoreAdmin('/admin/inventory');return {supabase:db,user}}
 
 function refreshInventory(){
   revalidatePath('/admin/inventory')

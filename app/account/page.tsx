@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createStoreAdminClient } from '@/lib/supabase/admin'
 import SignOutButton from './sign-out-button'
 
 const stages=['pending','processing','shipped','delivered']
@@ -14,7 +15,10 @@ async function updateNewsletterPreference(formData:FormData){
  const {data:{user}}=await supabase.auth.getUser()
  if(!user)redirect('/login?next=/account&mode=signin')
  const subscribed=String(formData.get('subscribed')||'')==='true'
- const {error}=await supabase.rpc('set_my_newsletter_subscription',{p_subscribed:subscribed})
+ const store=createStoreAdminClient()
+ const {error}=subscribed
+  ?await store.rpc('subscribe_newsletter',{p_email:user.email,p_full_name:user.user_metadata?.full_name||null,p_source:'account'})
+  :await store.from('newsletter_subscribers').update({status:'unsubscribed',unsubscribed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).ilike('email',user.email||'')
  if(error)redirect('/account?newsletter=error')
  revalidatePath('/account')
  redirect(`/account?newsletter=${subscribed?'subscribed':'unsubscribed'}`)
@@ -26,11 +30,14 @@ export default async function AccountPage({searchParams}:{searchParams?:Promise<
  const {data:authData}=await supabase.auth.getUser()
  const user=authData.user
  if(!user)redirect('/login?next=/account&mode=signin')
- const [{data:profile},{data:orders},{data:newsletterSubscribed}]=await Promise.all([
+ const store=createStoreAdminClient()
+ const [{data:profile},{data:storeOrders},{data:newsletter}]=await Promise.all([
   supabase.from('profiles').select('full_name,phone,role').eq('id',user.id).maybeSingle(),
-  supabase.rpc('get_my_orders'),
-  supabase.rpc('get_my_newsletter_preference')
+  store.from('orders').select('id,status,payment_status,total,created_at,updated_at,delivery_address,payment_reference,delivery_zone,payment_method,delivery_fee,subtotal,discount_amount,order_items(product_id,variant_id,product_name,size_label,size_grams,quantity,line_total)').eq('user_id',user.id).order('created_at',{ascending:false}),
+  store.from('newsletter_subscribers').select('status').ilike('email',user.email||'').maybeSingle()
  ])
+ const orders=storeOrders?.map(o=>({...o,items:o.order_items}))
+ const newsletterSubscribed=newsletter?.status==='subscribed'
  const m=user.user_metadata??{},fullName=profile?.full_name||m.full_name||'Customer',phone=profile?.phone||m.phone||'Not provided',address=m.delivery_address||'Not provided',location=[m.delivery_city,m.delivery_state].filter(Boolean).join(', ')||'Not provided',isAdmin=profile?.role==='admin'
  const details=[['Full name',fullName],['Email',user.email||'Not provided'],['Phone',phone],['Delivery address',address],['City / State',location]]
  const newsletterMessage=typeof params.newsletter==='string'?params.newsletter:''

@@ -3,7 +3,7 @@
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createCatalogueClient } from '@/lib/supabase/server'
 
 const PUBLIC_SITE_URL = 'https://folus-emporium-stores-online.vercel.app'
 
@@ -113,7 +113,8 @@ export async function signup(formData: FormData) {
   }
 
   if (newsletterConsent) {
-    await supabase.rpc('subscribe_newsletter', { p_email: email, p_full_name: fullName, p_source: 'registration' })
+    const store = await createCatalogueClient()
+    await store.rpc('subscribe_newsletter', { p_email: email, p_full_name: fullName, p_source: 'registration' })
   }
 
   if (data.session) {

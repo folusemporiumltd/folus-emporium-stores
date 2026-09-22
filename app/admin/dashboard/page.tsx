@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient, createCatalogueClient } from '@/lib/supabase/server'
+import { createStoreAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +20,11 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
     store.from('products').select('id', { count: 'exact', head: true }),
     store.from('categories').select('id', { count: 'exact', head: true }),
   ])
+  let orderCount: number | null = null
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const { count, error: ordersError } = await createStoreAdminClient().from('orders').select('id', { count: 'exact', head: true })
+    if (!ordersError) orderCount = count
+  }
 
   return <main>
     <div className="topbar"><div className="container"><span>Folus Emporium Stores</span><span>Store administration</span></div></div>
@@ -30,9 +36,11 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
       <div className="admin-dashboard-stats" style={{marginTop:28}}>
         <article className="admin-dashboard-stat"><span>Store products</span><strong>{products.error?'—':products.count??0}</strong><p>In the Stores database</p></article>
         <article className="admin-dashboard-stat"><span>Store categories</span><strong>{categories.error?'—':categories.count??0}</strong><p>In the Stores database</p></article>
+        <article className="admin-dashboard-stat"><span>Store orders</span><strong>{orderCount??'—'}</strong><p>In the Stores database</p></article>
       </div>
       {(products.error||categories.error)&&<p role="alert">Store catalogue totals are temporarily unavailable.</p>}
-      <section className="admin-dashboard-panel" style={{marginTop:28}}><h2>Manage this store</h2><p className="muted">Add and edit products for Folus Emporium Stores.</p><Link className="btn btn-primary" href="/admin/products">Open Store product manager</Link></section>
+      {orderCount === null && <p role="alert">Store administration cannot connect to private Store records. Check that SUPABASE_SERVICE_ROLE_KEY in this Vercel project belongs to the Folus Emporium Stores Supabase project.</p>}
+      <section className="admin-dashboard-panel" style={{marginTop:28}}><h2>Manage this store</h2><p className="muted">Manage Folus Emporium Stores records separately from the main website.</p><div style={{display:'flex',gap:12,flexWrap:'wrap'}}><Link className="btn btn-primary" href="/admin/products">Store products</Link><Link className="btn btn-outline" href="/admin/orders">Store orders</Link><Link className="btn btn-outline" href="/admin/inventory">Inventory</Link><Link className="btn btn-outline" href="/admin/coupons">Store coupons</Link></div></section>
     </div></section>
   </main>
 }

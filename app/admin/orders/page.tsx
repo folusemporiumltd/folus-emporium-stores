@@ -1,18 +1,11 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/supabase/store-access'
 import AdminBreadcrumbs from '@/components/admin-breadcrumbs'
 import { loadOrderForEmail, sendOrderEmail } from '@/lib/order-email'
 
-async function requireAdmin() {
-  const s = await createClient()
-  const { data: a } = await s.auth.getUser()
-  if (!a.user) redirect('/login?next=/admin/orders&mode=signin')
-  const { data: isAdmin, error } = await s.rpc('get_my_admin_status')
-  if (error || isAdmin !== true) redirect('/account?admin_error=access')
-  return s
-}
+async function requireAdmin() { return (await requireStoreAdmin('/admin/orders')).db }
 
 async function updateOrder(f: FormData) {
   'use server'

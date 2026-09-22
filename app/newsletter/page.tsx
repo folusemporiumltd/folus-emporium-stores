@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createCatalogueClient } from '@/lib/supabase/server'
 
 async function subscribe(formData:FormData){
   'use server'
-  const supabase=await createClient()
+  const supabase=await createCatalogueClient()
   const email=String(formData.get('email')||'').trim()
   const fullName=String(formData.get('full_name')||'').trim()
   const {error}=await supabase.rpc('subscribe_newsletter',{p_email:email,p_full_name:fullName,p_source:'newsletter_page'})
@@ -16,7 +16,7 @@ async function unsubscribe(formData:FormData){
   'use server'
   const token=String(formData.get('token')||'').trim()
   if(!token) redirect('/newsletter?error='+encodeURIComponent('Invalid unsubscribe link.'))
-  const supabase=await createClient()
+  const supabase=await createCatalogueClient()
   const {error}=await supabase.rpc('unsubscribe_newsletter',{p_token:token})
   if(error) redirect('/newsletter?error='+encodeURIComponent('We could not process your unsubscribe request.'))
   redirect('/newsletter?message='+encodeURIComponent('You have been unsubscribed from Folus Emporium Stores marketing emails.'))

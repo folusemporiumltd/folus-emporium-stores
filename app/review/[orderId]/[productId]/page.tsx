@@ -2,6 +2,8 @@ import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import {revalidatePath} from 'next/cache'
 import {createClient} from '@/lib/supabase/server'
+import {createStoreAdminClient} from '@/lib/supabase/admin'
+import {ensureStoreCustomer} from '@/lib/supabase/store-access'
 
 async function submitReview(formData:FormData){
   'use server'
@@ -16,7 +18,12 @@ async function submitReview(formData:FormData){
   if(!Number.isInteger(rating)||rating<1||rating>5||review.length<10||review.length>2000||title.length>120){
     redirect(`/review/${orderId}/${productId}?error=invalid`)
   }
-  const {error}=await db.rpc('submit_product_review',{p_order_id:orderId,p_product_id:productId,p_rating:rating,p_title:title||null,p_review:review})
+  const store=createStoreAdminClient()
+  const {data:order}=await store.from('orders').select('id,status,payment_status').eq('id',orderId).eq('user_id',user.id).maybeSingle()
+  const {data:purchase}=await store.from('order_items').select('id').eq('order_id',orderId).eq('product_id',productId).maybeSingle()
+  if(!order||!purchase||(order.payment_status!=='paid'&&order.status!=='delivered')) redirect(`/review/${orderId}/${productId}?error=Purchase%20verification%20failed`)
+  await ensureStoreCustomer(store,user)
+  const {error}=await store.from('product_reviews').insert({order_id:orderId,product_id:productId,user_id:user.id,rating,title:title||null,review,reviewer_name:String(user.user_metadata?.full_name||'Customer'),status:'pending'})
   if(error)redirect(`/review/${orderId}/${productId}?error=${encodeURIComponent(error.message)}`)
   revalidatePath(`/shop`)
   redirect(`/review/${orderId}/${productId}?submitted=1`)
@@ -28,9 +35,10 @@ export default async function ReviewPage({params,searchParams}:{params:Promise<{
   const db=await createClient()
   const {data:{user}}=await db.auth.getUser()
   if(!user)redirect(`/login?next=${encodeURIComponent(`/review/${orderId}/${productId}`)}&mode=signin`)
+  const store=createStoreAdminClient()
   const [{data:product},{data:existing}]=await Promise.all([
-    db.from('products').select('id,name,slug,image_url').eq('id',productId).eq('is_active',true).maybeSingle(),
-    db.from('product_reviews').select('rating,title,review,status').eq('order_id',orderId).eq('product_id',productId).eq('user_id',user.id).maybeSingle(),
+    store.from('products').select('id,name,slug,image_url').eq('id',productId).eq('is_active',true).maybeSingle(),
+    store.from('product_reviews').select('rating,title,review,status').eq('order_id',orderId).eq('product_id',productId).eq('user_id',user.id).maybeSingle(),
   ])
   if(!product)return <main><section className="section"><div className="container empty"><h1>Product not found</h1><Link className="btn btn-primary" href="/account">Return to My Account</Link></div></section></main>
   const submitted=query.submitted==='1'
