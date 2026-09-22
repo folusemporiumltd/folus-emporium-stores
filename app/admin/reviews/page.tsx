@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import {revalidatePath} from 'next/cache'
-import {createClient} from '@/lib/supabase/server'
+import {requireStoreAdmin} from '@/lib/supabase/store-access'
 import AdminBreadcrumbs from '@/components/admin-breadcrumbs'
 
-async function requireAdmin(){const db=await createClient();const {data:{user}}=await db.auth.getUser();if(!user)redirect('/login?next=/admin/reviews&mode=signin');const {data:ok}=await db.rpc('get_my_admin_status');if(ok!==true)redirect('/account?admin_error=access');return db}
+async function requireAdmin(){return (await requireStoreAdmin('/admin/reviews')).db}
 async function moderate(formData:FormData){
   'use server'
   const db=await requireAdmin(),id=String(formData.get('id')||''),status=String(formData.get('status')||'')

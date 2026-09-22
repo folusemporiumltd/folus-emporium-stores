@@ -1,17 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/supabase/store-access'
 import AdminBreadcrumbs from '@/components/admin-breadcrumbs'
 
-async function admin(){
-  const s=await createClient()
-  const {data:a}=await s.auth.getUser()
-  if(!a.user) redirect('/login?next=/admin/company')
-  const {data:ok}=await s.rpc('get_my_admin_status')
-  if(ok!==true) redirect('/account')
-  return s
-}
+async function admin(){return (await requireStoreAdmin('/admin/company')).db}
 
 const slugify=(v:string)=>v.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'page'
 function fresh(){['/','/about','/blog','/careers','/admin/company'].forEach(path=>revalidatePath(path))}

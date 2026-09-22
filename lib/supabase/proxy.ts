@@ -33,12 +33,12 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   // Until each module is routed to the Store database, prevent administrators
   // from editing the main website's records through this separate storefront.
-  if (pathname.startsWith('/admin/') && !pathname.startsWith('/admin/products') && !['/admin/dashboard','/admin/orders','/admin/coupons','/admin/inventory'].includes(pathname)) {
+  if (pathname.startsWith('/admin/') && !pathname.startsWith('/admin/products') && !['/admin/dashboard','/admin/orders','/admin/coupons','/admin/inventory','/admin/reports','/admin/storefront','/admin/company','/admin/reviews'].includes(pathname)) {
     const url = request.nextUrl.clone()
     url.pathname = '/admin/dashboard'
     return NextResponse.redirect(url)
   }
-  if (pathname.startsWith('/api/admin/') && !pathname.startsWith('/api/admin/products/')) {
+  if (pathname.startsWith('/api/admin/') && !pathname.startsWith('/api/admin/products/') && pathname !== '/api/admin/reports/export') {
     return NextResponse.json({ error: 'This Store admin module is unavailable while its data is being separated.' }, { status: 503 })
   }
   const publicRoute =

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createStoreAdminClient } from '@/lib/supabase/admin'
 
 function csvCell(value: unknown) {
   const text = value == null ? '' : String(value)
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
 
   const fromIso = new Date(`${from}T00:00:00.000Z`).toISOString()
   const toIso = new Date(`${to}T23:59:59.999Z`).toISOString()
-  const { data, error } = await supabase.rpc('get_admin_management_reports', { p_from: fromIso, p_to: toIso })
+  const { data, error } = await createStoreAdminClient().rpc('get_admin_management_reports', { p_from: fromIso, p_to: toIso })
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
   const report: any = data || {}

@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/supabase/store-access'
 import AdminBreadcrumbs from '@/components/admin-breadcrumbs'
 import '../dashboard/dashboard.css'
 
 function money(v:any){return new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(Number(v||0))}
 function dateInput(d:Date){return d.toISOString().slice(0,10)}
-async function requireAdmin(){const s=await createClient();const {data:a}=await s.auth.getUser();if(!a.user)redirect('/login?next=/admin/reports&mode=signin');const {data:ok}=await s.rpc('get_my_admin_status');if(ok!==true)redirect('/account?admin_error=access');return s}
+async function requireAdmin(){return (await requireStoreAdmin('/admin/reports')).db}
 
 export default async function ReportsPage({searchParams}:{searchParams:Promise<{from?:string,to?:string}>}){
  const sp=await searchParams; const now=new Date(); const monthStart=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1));
