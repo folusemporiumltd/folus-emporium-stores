@@ -1,17 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/supabase/store-access'
 import AdminBreadcrumbs from '@/components/admin-breadcrumbs'
 import '../dashboard/dashboard.css'
 
-async function requireAdmin(){
-  const supabase=await createClient()
-  const {data:auth}=await supabase.auth.getUser()
-  if(!auth.user)redirect('/login?next=/admin/customers&mode=signin')
-  const {data:isAdmin,error}=await supabase.rpc('get_my_admin_status')
-  if(error||isAdmin!==true)redirect('/account?admin_error=access')
-  return supabase
-}
+async function requireAdmin(){return (await requireStoreAdmin('/admin/customers')).db}
 
 function money(v:any){return new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(Number(v||0))}
 function niceDate(v:any){return v?new Date(v).toLocaleString('en-NG',{dateStyle:'medium',timeStyle:'short'}):'—'}
@@ -49,10 +42,10 @@ export default async function CustomersPage({searchParams}:{searchParams:Promise
 
     <section className="section" style={{paddingTop:42}}><div className="container">
       <AdminBreadcrumbs items={[{label:'Admin',href:'/admin/dashboard'},{label:'Customer CRM'}]}/>
-      <div className="section-head"><div><div className="eyebrow">Customer relationships</div><h1>Customer CRM</h1><p className="muted" style={{maxWidth:820}}>See registered customers, purchase activity, lifetime value, newsletter status and recent orders in one place. This page is admin-only.</p></div><div style={{display:'flex',gap:10,flexWrap:'wrap'}}><a className="btn btn-primary" href="/admin/customers/export">Export customer CSV</a><Link className="btn btn-outline" href="/admin/orders">Open orders</Link><Link className="btn btn-outline" href="/admin/newsletter">Newsletter</Link></div></div>
+      <div className="section-head"><div><div className="eyebrow">Customer relationships</div><h1>Customer CRM</h1><p className="muted" style={{maxWidth:820}}>See Store customers, purchase activity, lifetime value, newsletter status and recent orders in one place. This page is admin-only.</p></div><div style={{display:'flex',gap:10,flexWrap:'wrap'}}><a className="btn btn-primary" href="/admin/customers/export">Export customer CSV</a><Link className="btn btn-outline" href="/admin/orders">Open orders</Link><Link className="btn btn-outline" href="/admin/newsletter">Newsletter</Link></div></div>
 
       <div className="admin-dashboard-stats" style={{marginTop:22}}>
-        <article className="admin-dashboard-stat"><span>Registered customers</span><strong>{total}</strong><p>Non-admin customer profiles</p></article>
+        <article className="admin-dashboard-stat"><span>Store customers</span><strong>{total}</strong><p>Customers who have placed Store orders</p></article>
         <article className="admin-dashboard-stat"><span>Customers with orders</span><strong>{buyers}</strong><p>Placed at least one order</p></article>
         <article className="admin-dashboard-stat"><span>Returning customers</span><strong>{returning}</strong><p>Placed two or more orders</p></article>
         <article className="admin-dashboard-stat"><span>Newsletter subscribers</span><strong>{newsletter}</strong><p>Currently subscribed</p></article>

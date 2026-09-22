@@ -33,7 +33,7 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   // Until each module is routed to the Store database, prevent administrators
   // from editing the main website's records through this separate storefront.
-  if (pathname.startsWith('/admin/') && !pathname.startsWith('/admin/products') && !['/admin/dashboard','/admin/orders','/admin/coupons','/admin/inventory','/admin/reports','/admin/storefront','/admin/company','/admin/reviews'].includes(pathname)) {
+  if (pathname.startsWith('/admin/') && !pathname.startsWith('/admin/products') && !['/admin/dashboard','/admin/orders','/admin/coupons','/admin/inventory','/admin/reports','/admin/storefront','/admin/company','/admin/reviews','/admin/customers','/admin/customers/export'].includes(pathname)) {
     const url = request.nextUrl.clone()
     url.pathname = '/admin/dashboard'
     return NextResponse.redirect(url)

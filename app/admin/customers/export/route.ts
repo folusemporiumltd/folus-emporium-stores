@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createStoreAdminClient } from '@/lib/supabase/admin'
 
 function cell(value: unknown) {
   const text=String(value??'')
@@ -13,7 +14,7 @@ export async function GET(){
   const {data:isAdmin}=await supabase.rpc('get_my_admin_status')
   if(isAdmin!==true)return NextResponse.json({error:'Forbidden'},{status:403})
 
-  const {data:customers,error}=await supabase.rpc('list_admin_customer_crm')
+  const {data:customers,error}=await createStoreAdminClient().rpc('list_admin_customer_crm')
   if(error)return NextResponse.json({error:error.message||'Customer export failed'},{status:500})
 
   const header=['Customer Name','Email','Phone','Customer Type','Newsletter Status','Total Orders','Paid Orders','Delivered Orders','Lifetime Spend (NGN)','Last Order Date','Last Order Status','Last Payment Status','Last Delivery Zone','Last Delivery Address','Joined Date']
