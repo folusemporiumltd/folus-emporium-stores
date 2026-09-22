@@ -69,6 +69,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/payment/callback') ||
     pathname.startsWith('/api/folus-va') ||
     pathname === '/api/paystack/webhook' ||
+    pathname === '/api/store/health' ||
     pathname === '/api/newsletter/subscribe' ||
     pathname === '/api/resend/webhook' ||
     pathname === '/api/assets/folus-email-logo'
