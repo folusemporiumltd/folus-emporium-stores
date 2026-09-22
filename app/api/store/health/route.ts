@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createStoreAdminClient } from '@/lib/supabase/admin'
 
+// Production checks read the active deployment environment at request time.
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
